@@ -1,4 +1,4 @@
-from rest_framework import generics
+from rest_framework import viewsets
 
 from User.models import User
 from User.serializers import (
@@ -8,16 +8,16 @@ from User.serializers import (
 )
 
 
-class RegisterUser(generics.CreateAPIView):
+class RegisterUser(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = RegisterSerializers
 
 
-class LoginUser(generics.GenericAPIView):
+class LoginUser(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = LoginSerializers
 
 
-class UserDetail(generics.ListAPIView):
+class UserDetail(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserDetailSerializer
