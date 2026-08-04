@@ -11,7 +11,7 @@ app_name = "User"
 
 router = routers.DefaultRouter()
 
-router.register("users", RegisterUser, basename="UserRegistration")
+router.register("register", RegisterUser, basename="UserRegistration")
 router.register("login", LoginUser, basename="Login")
 router.register("users", UserDetail, basename="UserDetail")
 
