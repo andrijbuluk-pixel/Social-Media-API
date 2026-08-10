@@ -1,47 +1,42 @@
 from rest_framework import serializers
+from django.contrib.auth import get_user_model
 
-from User.models import User
 
-
-class RegisterSerializers(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
     class Meta:
-        model = User
+        model = get_user_model()
         fields = (
-            "username",
-            "email",
-            "password",
-        )
-
-        extra_kwargs = {"password": {"write_only": True}}
-
-
-class LoginSerializers(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = (
-            "email",
-            "password",
-        )
-
-        extra_kwargs = {"password": {"write_only": True}}
-
-
-class UserDetailSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = (
+            "id",
             "avatar",
-            "username",
             "first_name",
             "last_name",
+            "phone_number",
             "gender",
             "email",
-            "phone_number",
-            "is_active",
             "location",
             "description",
             "password",
+            "is_staff",
         )
+        read_only_fields = ("is_staff",)
+        extra_kwargs = {
+            "password": {
+                "write_only": True,
+                "min_length": 5,
+                "style": {"input_type": "password"},
+            }
+        }
 
-        read_only_fields = ("is_active", )
-        extra_kwargs = {"password": {"write_only": True}}
+    def create(self, validated_data):
+        """Create a new user with encrypted password and return it"""
+        return get_user_model().objects.create_user(**validated_data)
+
+    def update(self, instance, validated_data):
+        """Update a user, set the password correctly and return it"""
+        password = validated_data.pop("password", None)
+        user = super().update(instance, validated_data)
+        if password:
+            user.set_password(password)
+            user.save()
+
+        return user
