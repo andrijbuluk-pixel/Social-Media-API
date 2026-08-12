@@ -57,7 +57,7 @@ class User(AbstractUser):
     description = models.TextField(blank=True, null=True)
 
     USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = [""]
+    REQUIRED_FIELDS = []
 
     objects = UserManager()
 

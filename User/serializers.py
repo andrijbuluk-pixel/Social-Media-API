@@ -2,7 +2,7 @@ from rest_framework import serializers
 from django.contrib.auth import get_user_model
 
 
-class UserSerializer(serializers.ModelSerializer):
+class CreateUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = get_user_model()
         fields = (
@@ -15,7 +15,6 @@ class UserSerializer(serializers.ModelSerializer):
             "email",
             "location",
             "description",
-            "password",
             "is_staff",
         )
         read_only_fields = ("is_staff",)
@@ -40,3 +39,11 @@ class UserSerializer(serializers.ModelSerializer):
             user.save()
 
         return user
+
+
+class AvatarSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = get_user_model()
+        fields = (
+            "avatar",
+        )
