@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "rest_framework_swagger",
     "drf_spectacular",
+    "django_filters",
 
     "User",
     "media_system"
@@ -129,7 +130,10 @@ REST_FRAMEWORK = {
         "rest_framework_simplejwt.authentication.JWTAuthentication",
 
     ],
-    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema'
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend'
+    ],
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
 SIMPLE_JWT = {
