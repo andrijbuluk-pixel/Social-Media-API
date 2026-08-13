@@ -11,6 +11,7 @@ from User.views import (
     CreateUserView,
     UserDetailView,
     AvatarUploadView,
+    UserSearchView,
 )
 
 app_name = "User"
@@ -24,5 +25,6 @@ urlpatterns = [
     path("logout/", TokenBlacklistView.as_view(), name="logout"),
 
     path("me/", UserDetailView.as_view(), name="user_detail"),
+    path("me/shearch/", UserSearchView.as_view(), name="shearch"),
     path("me/upload-avatar/", AvatarUploadView.as_view(), name="avatar"),
 ]

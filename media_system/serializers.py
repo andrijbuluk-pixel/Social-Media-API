@@ -26,6 +26,10 @@ class PostSerializer(serializers.ModelSerializer):
     def get_comment_count(obj):
         return obj.comment_post.count()
 
+    @staticmethod
+    def get_post_count(obj):
+        return obj.post_count.count()
+
 
 class CreateCommentSerializer(serializers.ModelSerializer):
     class Meta:
