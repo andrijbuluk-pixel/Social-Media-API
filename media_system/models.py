@@ -7,6 +7,7 @@ class Post(models.Model):
     user = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.CASCADE)
     post = models.TextField(max_length=500)
     image = models.ImageField(upload_to="media/", blank=True, null=True)
+    hashtag = models.CharField(max_length=500, blank=True, null=True)
 
     def __str__(self):
         return f"{self.post}"
