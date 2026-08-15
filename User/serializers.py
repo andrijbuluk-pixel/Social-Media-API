@@ -1,9 +1,19 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from drf_spectacular.utils import extend_schema_field
+from typing import List
+
+from User.models import Follow
 
 
-class CreateUserSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
+    posts_count = serializers.SerializerMethodField()
+    likes_count = serializers.SerializerMethodField()
+    comments_count = serializers.SerializerMethodField()
+
+    followers = serializers.SerializerMethodField()
+    following = serializers.SerializerMethodField()
+
     class Meta:
         model = get_user_model()
         fields = (
@@ -17,8 +27,19 @@ class CreateUserSerializer(serializers.ModelSerializer):
             "location",
             "description",
             "is_staff",
+            "password",
+
+            "followers",
+            "following",
+            "posts_count",
+            "likes_count",
+            "comments_count",
         )
-        read_only_fields = ("is_staff",)
+        read_only_fields = (
+            "is_staff", "follower",
+            "following", "posts_count",
+            "likes_count", "comments_count"
+        )
         extra_kwargs = {
             "password": {
                 "write_only": True,
@@ -41,32 +62,6 @@ class CreateUserSerializer(serializers.ModelSerializer):
 
         return user
 
-
-class UserSerializer(serializers.ModelSerializer):
-    posts_count = serializers.SerializerMethodField()
-    likes_count = serializers.SerializerMethodField()
-    comments_count = serializers.SerializerMethodField()
-
-    class Meta:
-        model = get_user_model()
-        fields = (
-            "id",
-            "first_name",
-            "last_name",
-            "phone_number",
-            "gender",
-            "email",
-            "location",
-            "description",
-            "is_staff",
-            "is_active",
-            "posts_count",
-            "likes_count",
-            "comments_count",
-        )
-
-        read_only_fields = ("is_staff", "is_active")
-
     @extend_schema_field(int)
     def get_posts_count(self, obj) -> int:
         return obj.post_set.count()
@@ -80,10 +75,33 @@ class UserSerializer(serializers.ModelSerializer):
     def get_comments_count(self, obj) -> int:
         return obj.user_comment.count()
 
+    @extend_schema_field(List[int])
+    def get_followers(self, obj):
+        return Follow.objects.filter(following=obj).values_list(
+            "follower_id", flat=True
+        )
 
-class AvatarSerializer(serializers.ModelSerializer):
+    @extend_schema_field(List[int])
+    def get_following(self, obj):
+        return Follow.objects.filter(follower=obj).values_list(
+            "following_id", flat=True
+        )
+
+
+class AvatarUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = get_user_model()
         fields = (
             "avatar",
+        )
+
+
+class FollowerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = get_user_model()
+        fields = (
+            "id",
+            "avatar",
+            "first_name",
+            "last_name",
         )
