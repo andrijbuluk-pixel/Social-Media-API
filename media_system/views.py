@@ -27,7 +27,7 @@ class PostSearchApi(generics.ListAPIView):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter]
-    search_fields = ["post"]
+    search_fields = ["post", "hashtag"]
 
 
 
