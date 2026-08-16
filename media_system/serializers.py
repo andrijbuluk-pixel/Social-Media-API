@@ -1,10 +1,11 @@
 from rest_framework import serializers
-from media_system.models import Post, Comment, Like
+from media_system.models import Post, Comment, Like, Hashtag
 
 
 class PostSerializer(serializers.ModelSerializer):
     like_count = serializers.SerializerMethodField()
     comment_count = serializers.SerializerMethodField()
+    hashtag = serializers.SerializerMethodField()
 
     class Meta:
         model = Post
@@ -13,10 +14,22 @@ class PostSerializer(serializers.ModelSerializer):
             "user",
             "image",
             "post",
+            "hashtag",
             "like_count",
             "comment_count"
 
         )
+
+    @staticmethod
+    def added_hashtag(post):
+        for hashtag in set(post.post.split()):
+            if hashtag.startswith("#"):
+                new_hashtag = Hashtag.objects.get_or_create(hashtag=hashtag)
+                post.hashtag.add(new_hashtag[0])
+
+    def get_hashtag(self, obj):
+        return obj.hashtag.values_list("hashtag", flat=True)
+
 
     @staticmethod
     def get_like_count(obj):

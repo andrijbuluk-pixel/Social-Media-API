@@ -17,6 +17,10 @@ from media_system.models import Like, Post
 class CreatePostApi(generics.CreateAPIView):
     serializer_class = PostSerializer
 
+    def perform_create(self, serializer):
+        post_instance = serializer.save()
+        PostSerializer.added_hashtag(post_instance)
+
 
 class DetailPostApiCRUD(generics.RetrieveUpdateDestroyAPIView):
     queryset = Post.objects.all()
@@ -27,8 +31,8 @@ class PostSearchApi(generics.ListAPIView):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter]
-    search_fields = ["post", "hashtag"]
-
+    search_fields = ["post",]
+    filterset_fields = ["hashtag"]
 
 
 class CreateCommentApi(generics.CreateAPIView):
