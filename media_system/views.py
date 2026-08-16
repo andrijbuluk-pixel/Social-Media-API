@@ -11,7 +11,7 @@ from media_system.serializers import (
     LikeSerializer,
 )
 
-from media_system.models import Like, Post
+from media_system.models import Like, Post, Follow
 
 
 class CreatePostApi(generics.CreateAPIView):
@@ -25,6 +25,10 @@ class CreatePostApi(generics.CreateAPIView):
 class DetailPostApiCRUD(generics.RetrieveUpdateDestroyAPIView):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
+
+    def perform_update(self, serializer):
+        post_instance = serializer.save()
+        PostSerializer.added_hashtag(post_instance)
 
 
 class PostSearchApi(generics.ListAPIView):
@@ -40,6 +44,12 @@ class CreateCommentApi(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+    def get_queryset(self):
+        user = self.request.user
+        user_following = Follow.objects.filter(follower=user).values_list("following", flat=True)
+
+        return Post.objects.filter(user__in=user_following)
 
 
 class AddLikeApi(APIView):
