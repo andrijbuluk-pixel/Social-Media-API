@@ -2,7 +2,7 @@ from django.db import transaction
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
 from rest_framework import generics
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
@@ -12,12 +12,14 @@ from media_system.serializers import (
     LikeSerializer,
 )
 
+from media_system.permissions import IsAuthorOrReadOnly
 from media_system.models import Like, Post, Follow
 from media_system.tasks import postponed_post_task
 
 
 class CreatePostApi(generics.CreateAPIView):
     serializer_class = PostSerializer
+    permission_classes = (IsAuthorOrReadOnly, IsAuthenticated)
 
     def perform_create(self, serializer):
         published_at = serializer.validated_data.get('published_at')
@@ -41,6 +43,7 @@ class CreatePostApi(generics.CreateAPIView):
 class DetailPostApiCRUD(generics.RetrieveUpdateDestroyAPIView):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
+    permission_classes = (IsAuthorOrReadOnly,)
 
     def perform_update(self, serializer):
         post_instance = serializer.save()
@@ -50,6 +53,7 @@ class DetailPostApiCRUD(generics.RetrieveUpdateDestroyAPIView):
 class PostSearchApi(generics.ListAPIView):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
+    permission_classes = (AllowAny,)
     filter_backends = [DjangoFilterBackend, SearchFilter]
     search_fields = ["post",]
     filterset_fields = ["hashtag"]
@@ -57,6 +61,7 @@ class PostSearchApi(generics.ListAPIView):
 
 class CreateCommentApi(generics.CreateAPIView):
     serializer_class = CreateCommentSerializer
+    permission_classes = (IsAuthenticated,)
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
@@ -71,14 +76,15 @@ class CreateCommentApi(generics.CreateAPIView):
 class AddLikeApi(APIView):
     queryset = Like.objects.all()
     serializer_class = LikeSerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, )
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
+
     def post(self, request, pk):
         post = Post.objects.get(pk=pk)
-        like, created = Like.objects.get_or_create(user=request.user, post=post)
+        like, created = Like.objects.get_or_create(user=self.request.user, post=post)
 
         if not created:
             like.delete()
