@@ -1,3 +1,4 @@
+from django.db import transaction
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
 from rest_framework import generics
@@ -12,14 +13,29 @@ from media_system.serializers import (
 )
 
 from media_system.models import Like, Post, Follow
+from media_system.tasks import postponed_post_task
 
 
 class CreatePostApi(generics.CreateAPIView):
     serializer_class = PostSerializer
 
     def perform_create(self, serializer):
-        post_instance = serializer.save()
-        PostSerializer.added_hashtag(post_instance)
+        published_at = serializer.validated_data.get('published_at')
+
+        if published_at:
+            post_instance = serializer.save(is_published=False)
+            PostSerializer.added_hashtag(post_instance)
+
+            transaction.on_commit(
+                lambda: postponed_post_task.apply_async(
+                    args=[post_instance.id],
+                    eta=published_at,
+                )
+            )
+
+        else:
+            post_instance = serializer.save(is_published=True)
+            PostSerializer.added_hashtag(post_instance)
 
 
 class DetailPostApiCRUD(generics.RetrieveUpdateDestroyAPIView):

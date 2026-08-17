@@ -8,6 +8,8 @@ class Post(models.Model):
     post = models.TextField(max_length=500)
     image = models.ImageField(upload_to="media/", blank=True, null=True)
     hashtag = models.ManyToManyField("Hashtag", blank=True, max_length=200, related_name="articles")
+    published_at = models.DateTimeField(null=True, blank=True)
+    is_published = models.BooleanField(default=True)
 
     def __str__(self):
         return f"{self.post}"

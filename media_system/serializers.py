@@ -16,9 +16,12 @@ class PostSerializer(serializers.ModelSerializer):
             "post",
             "hashtag",
             "like_count",
-            "comment_count"
-
+            "comment_count",
+            "published_at",
+            "is_published"
         )
+
+        read_only_fields = ("is_published",)
 
     @staticmethod
     def added_hashtag(post):
@@ -29,7 +32,6 @@ class PostSerializer(serializers.ModelSerializer):
 
     def get_hashtag(self, obj):
         return obj.hashtag.values_list("hashtag", flat=True)
-
 
     @staticmethod
     def get_like_count(obj):
@@ -42,6 +44,9 @@ class PostSerializer(serializers.ModelSerializer):
     @staticmethod
     def get_post_count(obj):
         return obj.post_count.count()
+
+    def create(self, validated_data):
+        return super().create(validated_data)
 
 
 class CreateCommentSerializer(serializers.ModelSerializer):
