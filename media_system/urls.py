@@ -15,5 +15,4 @@ urlpatterns = [
     path("comment/", CreateCommentApi.as_view(), name="create_comment"),
     path("like/<int:pk>/", AddLikeApi.as_view(), name="add_like"),
     path("search/", PostSearchApi.as_view(), name="search_post"),
-    # path("search/me-post/", PostSearchApi.as_view(), name="search_post"),
 ]
